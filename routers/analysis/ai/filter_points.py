@@ -130,6 +130,7 @@ async def remove_duplicate_points(new_points: List, ticker_id: int, threshold: f
                 "post_id": post_id
             })
         else:
+            print("COULDNT FILTER DUPLICATE, PASSING TO GPT")
             # Add candidate without embedding for GPT
             candidate_points_for_gpt.append({
                 "point": text,
@@ -160,7 +161,7 @@ async def remove_duplicate_points(new_points: List, ticker_id: int, threshold: f
         )
 
         response = client.responses.create(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             input=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}

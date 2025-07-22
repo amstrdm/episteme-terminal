@@ -52,7 +52,7 @@ async def summarize_points_from_post(post_id):
     """
 
     response = await client.responses.create(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         input=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
