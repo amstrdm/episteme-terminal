@@ -1,9 +1,10 @@
 import os
+
 from dotenv import load_dotenv
 
-current_dir = os.path.dirname(__file__)
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
-ENV_PATH = os.getenv("ENV_PATH")
+ENV_PATH = os.path.join(current_dir, "config.env")
 
 load_dotenv(ENV_PATH)
 
@@ -14,4 +15,6 @@ DB_NAME = os.getenv("POSTGRESQL_DBNAME")
 STOCKS_DB_NAME = os.getenv("POSTGRESQL_STOCKS_DBNAME")
 
 DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
-STOCKS_DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{STOCKS_DB_NAME}"
+STOCKS_DATABASE_URL = (
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{STOCKS_DB_NAME}"
+)
