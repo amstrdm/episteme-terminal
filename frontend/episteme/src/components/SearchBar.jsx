@@ -5,30 +5,28 @@ import apiClient from "../api/axiosinstance";
 import Modal from "./Modal";
 
 const formatReadableDateTime = (dateString) => {
-    try {
-        const date = new Date(dateString.split('.')[0].replace(' ', 'T') + 'Z');
+  try {
+    const date = new Date(dateString.split(".")[0].replace(" ", "T") + "Z");
 
-        if (isNaN(date.getTime())) {
-            console.warn("Could not parse date:", dateString);
-            return dateString;
-        }
-
-        const options = {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-        };
-        return new Intl.DateTimeFormat('en-US', options).format(date);
-
-    } catch (error) {
-        console.error("Error formatting date:", error);
-        return dateString;
+    if (isNaN(date.getTime())) {
+      console.warn("Could not parse date:", dateString);
+      return dateString;
     }
-};
 
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    };
+    return new Intl.DateTimeFormat("en-US", options).format(date);
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return dateString;
+  }
+};
 
 const SearchBar = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,7 +34,11 @@ const SearchBar = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState({ message: "", existingAnalysis: null, ticker: null });
+  const [modalContent, setModalContent] = useState({
+    message: "",
+    existingAnalysis: null,
+    ticker: null,
+  });
   const [isGenerating, setIsGenerating] = useState(false);
 
   const navigate = useNavigate();
@@ -44,9 +46,9 @@ const SearchBar = () => {
 
   useEffect(() => {
     if (!searchTerm.trim()) {
-        setResults([]);
-        setShowResults(false);
-        return;
+      setResults([]);
+      setShowResults(false);
+      return;
     }
     setIsLoading(true);
     setShowResults(true);
@@ -68,62 +70,84 @@ const SearchBar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-        if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-            setShowResults(false);
-        }
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target)
+      ) {
+        setShowResults(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-   }, []);
+  }, []);
 
   const handleInputChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  const handleResultClick = useCallback(async (ticker) => {
-      setSearchTerm('');
+  const handleResultClick = useCallback(
+    async (ticker) => {
+      setSearchTerm("");
       setResults([]);
       setShowResults(false);
       try {
         console.log(`Checking analysis for ticker: ${ticker}`);
-        const response = await apiClient.get('/check-analysis', { params: { ticker } });
+        const response = await apiClient.get("/check-analysis", {
+          params: { ticker },
+        });
         const responseData = response.data;
-        console.log('Response from /check-analysis:', responseData);
+        console.log("Response from /check-analysis:", responseData);
 
         let displayMessage = responseData.message;
 
-        if (responseData.existing_analysis && typeof displayMessage === 'string') {
-          const dateTimeRegex = /(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}(\.\d+)?)/;
+        if (
+          responseData.existing_analysis &&
+          typeof displayMessage === "string"
+        ) {
+          const dateTimeRegex =
+            /(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}(\.\d+)?)/;
           const match = displayMessage.match(dateTimeRegex);
 
           if (match && match[1]) {
             const originalDateTimeString = match[1];
-            const formattedDateTime = formatReadableDateTime(originalDateTimeString);
+            const formattedDateTime = formatReadableDateTime(
+              originalDateTimeString
+            );
             if (formattedDateTime !== originalDateTimeString) {
-                 displayMessage = displayMessage.replace(originalDateTimeString, formattedDateTime);
+              displayMessage = displayMessage.replace(
+                originalDateTimeString,
+                formattedDateTime
+              );
             }
           }
         }
 
         setModalContent({
-            message: displayMessage,
-            existingAnalysis: responseData.existing_analysis,
-            ticker: ticker
+          message: displayMessage,
+          existingAnalysis: responseData.existing_analysis,
+          ticker: ticker,
         });
         setIsModalOpen(true);
-
       } catch (error) {
-         console.error(`Failed to check analysis for ${ticker}:`, error);
-         const errorMsg = error.response?.data?.message || `Error checking analysis for ${ticker}. Please try again.`;
-         setModalContent({ message: errorMsg, existingAnalysis: null, ticker: null });
-         setIsModalOpen(true);
+        console.error(`Failed to check analysis for ${ticker}:`, error);
+        const errorMsg =
+          error.response?.data?.message ||
+          `Error checking analysis for ${ticker}. Please try again.`;
+        setModalContent({
+          message: errorMsg,
+          existingAnalysis: null,
+          ticker: null,
+        });
+        setIsModalOpen(true);
       }
-  }, [navigate]);
+    },
+    [navigate]
+  );
 
   const closeModal = () => {
     setIsModalOpen(false);
     if (isGenerating) {
-        setIsGenerating(false);
+      setIsGenerating(false);
     }
   };
 
@@ -135,29 +159,34 @@ const SearchBar = () => {
 
     try {
       console.log(`Generating analysis for ticker: ${currentTicker}`);
-      const response = await apiClient.get('/generate-analysis', { params: {ticker: currentTicker} });
+      const response = await apiClient.get("/generate-analysis", {
+        params: { ticker: currentTicker },
+      });
       const data = response.data;
-      console.log('Response from /generate-analysis:', data);
+      console.log("Response from /generate-analysis:", data);
 
-      if (data.status === 'started' && data.task_id) {
+      if (data.status === "started" && data.task_id) {
         console.log(`Navigating to loading page for task ${data.task_id}`);
         navigate(`/loading-analysis/${data.task_id}/${currentTicker}`);
         return;
       } else {
-        console.error('Analysis task did not start as expected:', data);
-        setModalContent(prev => ({
-            ...prev,
-            message: data.message || 'Failed to start analysis task. Please try again.'
+        console.error("Analysis task did not start as expected:", data);
+        setModalContent((prev) => ({
+          ...prev,
+          message:
+            data.message || "Failed to start analysis task. Please try again.",
         }));
         setIsGenerating(false);
       }
-
     } catch (error) {
       console.error(`Failed to generate analysis for ${currentTicker}:`, error);
-      const errorMsg = error.response?.data?.detail || error.response?.data?.message || 'An error occurred while starting the analysis.';
-      setModalContent(prev => ({
-           ...prev,
-           message: errorMsg
+      const errorMsg =
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        "An error occurred while starting the analysis.";
+      setModalContent((prev) => ({
+        ...prev,
+        message: errorMsg,
       }));
       setIsGenerating(false);
     }
@@ -170,14 +199,24 @@ const SearchBar = () => {
     }
   };
 
-
-   return (
+  return (
     <div className="relative w-full" ref={searchContainerRef}>
       {/* Search Input */}
       <div className="flex gap-3 items-center px-4 py-2.5 rounded-full border border-gray-700 bg-dark-background text-light-text min-h-12 w-full focus-within:border-green-500">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-      </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="size-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+          />
+        </svg>
 
         <input
           type="text"
@@ -202,8 +241,10 @@ const SearchBar = () => {
                 key={result.ticker}
                 onClick={() => handleResultClick(result.ticker)}
                 className={`p-3 hover:bg-gray-700 cursor-pointer text-light-text flex justify-between items-center
-                           ${index === 0 ? 'rounded-t-2xl' : ''}
-                           ${index === results.length - 1 ? 'rounded-b-2xl' : ''}`}
+                           ${index === 0 ? "rounded-t-2xl" : ""}
+                           ${
+                             index === results.length - 1 ? "rounded-b-2xl" : ""
+                           }`}
               >
                 <span className="font-medium">{result.ticker}</span>
                 <span className="text-sm text-gray-400 truncate ml-2">
@@ -214,17 +255,17 @@ const SearchBar = () => {
         </div>
       )}
 
-        {/* Confirmation Modal */}
-        <Modal
-            isOpen={isModalOpen}
-            onClose={closeModal} // Use the updated closeModal
-            message={modalContent.message}
-            existingAnalysis={modalContent.existingAnalysis}
-            onYes={handleGenerateAnalysis} // Use the updated handler
-            onNo={closeModal} // Directly close modal on "No"
-            onAccessExisting={handleAccessExisting}
-            onCreateNew={handleGenerateAnalysis} // Use the updated handler
-            isGenerating={isGenerating}
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal} // Use the updated closeModal
+        message={modalContent.message}
+        existingAnalysis={modalContent.existingAnalysis}
+        onYes={handleGenerateAnalysis} // Use the updated handler
+        onNo={closeModal} // Directly close modal on "No"
+        onAccessExisting={handleAccessExisting}
+        onCreateNew={handleGenerateAnalysis} // Use the updated handler
+        isGenerating={isGenerating}
       />
     </div>
   );

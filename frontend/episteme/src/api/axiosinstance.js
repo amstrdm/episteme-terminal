@@ -1,9 +1,9 @@
 // src/api/axiosInstance.js
 
-import axios from 'axios';
+import axios from "axios";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-const apiSecretKey = import.meta.env.VITE_API_KEY
+const apiSecretKey = import.meta.env.VITE_API_KEY;
 
 if (!apiBaseUrl && import.meta.env.PROD) {
   console.warn(
@@ -14,16 +14,16 @@ if (!apiBaseUrl && import.meta.env.PROD) {
 if (!apiSecretKey) {
   console.warn(
     "CRITICAL WARNING: VITE_API_KEY environment variable is NOT SET. API calls will be unauthenticated and will likely fail."
-  )
+  );
 }
 
 const apiClient = axios.create({
-  baseURL: apiBaseUrl || '',
+  baseURL: apiBaseUrl || "",
 
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'X-API-KEY': apiSecretKey || '',
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "X-API-KEY": apiSecretKey || "",
   },
 });
 
