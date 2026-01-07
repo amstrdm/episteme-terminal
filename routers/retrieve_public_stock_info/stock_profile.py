@@ -73,9 +73,12 @@ def get_stock_profile(ticker, user_timezone_str: str):
     profile_response = r.get(
         url=f"{BASE_URL}profile?symbol={ticker}", params={"apikey": api_key}
     )
-    print(api_key)
-    print(profile_response.text)
+    dcf_response = r.get(
+        url=f"{BASE_URL}discounted-cash-flow?symbol={ticker}",
+        params={"apikey": api_key},
+    )
     profile_data = response_to_json(profile_response)
+    dcf_data = response_to_json(dcf_response)
 
     stock_info = {
         "symbol": profile_data.get("symbol", "N/A"),
@@ -84,13 +87,13 @@ def get_stock_profile(ticker, user_timezone_str: str):
         "website": profile_data.get("website", "N/A"),
         "description": profile_data.get("description", "N/A"),
         "price": profile_data.get("price", "N/A"),
-        "exchangeShortName": profile_data.get("exchangeShortName", "N/A"),
-        "mktCap": profile_data.get("mktCap", "N/A"),
+        "exchange": profile_data.get("exchangeShortName", "N/A"),
+        "marketCap": profile_data.get("mktCap", "N/A"),
         "industry": profile_data.get("industry", "N/A"),
         "earningsCallDate": get_earnings_date(yf_ticker, user_timezone_str),
         "analystRating": yf_company_info.get("recommendationKey", "N/A"),
         "forwardPE": yf_company_info.get("forwardPE", "N/A"),
-        "dcf": profile_data.get("dcf", "N/A"),
+        "dcf": dcf_data.get("dcf", "N/A"),
         "beta": profile_data.get("beta", "N/A"),
     }
 
