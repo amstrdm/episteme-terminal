@@ -10,20 +10,24 @@ ENV_PATH = os.getenv("ENV_PATH")
 load_dotenv(ENV_PATH)
 api_key = os.getenv("FMP_API_KEY")
 
-BASE_URL = "https://financialmodelingprep.com/api/v3/"
+BASE_URL = "https://financialmodelingprep.com/stable/"
+
 
 def response_to_json(data):
     try:
         json_response = data.json()
         # Check if the response is a list before trying to access index 0
         if isinstance(json_response, list) and len(json_response) > 0:
-            json_data = json_response[0] # The api should returns a list of dictionaries
+            json_data = json_response[
+                0
+            ]  # The api should returns a list of dictionaries
         else:
             json_data = json_response
     except (IndexError, ValueError):
         json_data = {}
-    
+
     return json_data
+
 
 def get_company_logo(profile_data):
     # Get the image separately since we have to check if the URL is valid
@@ -33,13 +37,14 @@ def get_company_logo(profile_data):
         image = image_url if image_valid else None
     except:
         image = None
-    
+
     return image
+
 
 def get_earnings_date(yf_ticker: yf.Ticker, user_timezone_str: str):
     try:
         earnings_dates_df = yf_ticker.get_earnings_dates(limit=4)
-        
+
         # Ensure the DataFrame is sorted by the earnings date
         earnings_dates_df.sort_index(ascending=True, inplace=True)
 
@@ -55,25 +60,22 @@ def get_earnings_date(yf_ticker: yf.Ticker, user_timezone_str: str):
         formatted_date = localized_date.strftime("%Y-%m-%d %H:%M %Z")
     except Exception:
         formatted_date = "N/A"
-    
+
     return formatted_date
 
 
-def get_stock_profile(ticker, user_timezone_str:str):
-    
+def get_stock_profile(ticker, user_timezone_str: str):
     # Get data from yahoo finance
     yf_ticker = yf.Ticker(ticker)
     yf_company_info = yf_ticker.info
 
     # Get additional data from FMP
     profile_response = r.get(
-        url=f"{BASE_URL}profile/{ticker}",
-        params = {
-            "apikey": api_key
-        }
+        url=f"{BASE_URL}profile?symbol={ticker}", params={"apikey": api_key}
     )
+    print(api_key)
+    print(profile_response.text)
     profile_data = response_to_json(profile_response)
-
 
     stock_info = {
         "symbol": profile_data.get("symbol", "N/A"),
@@ -100,3 +102,4 @@ if __name__ == "__main__":
     profile = get_stock_profile(ticker, "Europe/Berlin")
 
     print(json.dumps(profile, indent=4))
+
