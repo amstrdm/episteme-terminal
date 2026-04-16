@@ -1,6 +1,11 @@
-The Readme will be finished soon. For now, all info about Episteme and how it was built can be found in the documentation. The documentation can be accessed in two ways:
+# Episteme
 
-- Through the Episteme website: https://www.episteme.cloud/introduction
-- As a PDF, which is on the repo and can be found here: https://github.com/amstrdm/episteme/blob/main/Episteme%20-%20Documentation.pdf
+Episteme is a financial terminal built on the concept of crowd sourcing market insights.
 
-I recommend the website since everything there is nicely organized, structured, and formatted via MDX files, while the PDF is just one large file I had to generate to send to my school.
+All info about Episteme and how it was built can be found in the documentation which can be accessed as markdown (recommended) or pdf:
+
+- The documentation was originally written in markdown which is why I recommend reading it in that format. It's hosted as a github gist: https://gist.github.com/amstrdm/06f9a7eecde222300178bf04e2aed240
+- In case you prefer PDF there is a converted version of the original markdown on the repo:
+https://github.com/amstrdm/episteme/blob/main/Episteme%20-%20Documentation.pdf
+
+However be advised that there might be some formatting issues with the PDF.
